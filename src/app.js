@@ -1,11 +1,24 @@
 import express from "express";
 
 import logger from "morgan";
-
+import * as admin from "firebase-admin";
+import serviceAccount from "./pwagram-bd625-firebase-adminsdk-ew3ye-db17bc2116.json";
 import authRouter from "./routes/auth";
 import dataRouter from "./routes/data";
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: "gs://pwagram-bd625.appspot.com/"
+});
+
 const app = express();
+const auth = admin.auth();
+const db = admin.firestore();
+const bucket = admin.storage().bucket();
+
+app.set("auth", auth);
+app.set("db", db);
+app.set("bucket", bucket);
 
 app.use(logger("dev"));
 app.use(express.json());
