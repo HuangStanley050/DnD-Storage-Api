@@ -2,13 +2,13 @@ import express from "express";
 import cors from "cors";
 import logger from "morgan";
 import * as admin from "firebase-admin";
-import serviceAccount from "./pwagram-bd625-firebase-adminsdk-ew3ye-db17bc2116.json";
+import serviceAccount from "./graphql-gram-94075-firebase-adminsdk-ejim3-44c474bfe5.json";
 import authRouter from "./routes/auth";
 import dataRouter from "./routes/data";
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "gs://pwagram-bd625.appspot.com/"
+  storageBucket: "gs://dining-out-94075.appspot.com"
 });
 const auth = admin.auth();
 const db = admin.firestore();
