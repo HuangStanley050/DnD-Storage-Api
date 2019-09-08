@@ -1,14 +1,16 @@
 import uuid from "uuid/v4";
 export default {
-  storeFiles: (req, res, next) => {
+  storeFiles: async (req, res, next) => {
     const bucket = req.app.get("bucket");
+    let upload_queue = [];
+
     let fileSize;
     let fileType;
     let creationTime;
     let creator = "Goblin Slayer";
     let fileInfo;
 
-    req.files.forEach(async (file, index) => {
+    req.files.forEach((file, index) => {
       fileSize = file.size;
       fileType = file.mimetype;
       creationTime = Date.now();
@@ -19,24 +21,27 @@ export default {
         creator,
         name: file.originalname
       };
-      console.log(fileInfo);
+
       let tempblob = bucket.file(`DnD-${uuid()}-${file.originalname}`);
-
-      let tempblob_stream = tempblob.createWriteStream();
-
-      tempblob_stream.on("error", err => {
-        next(err);
+      const newPromise = new Promise((resolve, reject) => {
+        tempblob
+          .createWriteStream()
+          .on("finish", () => {
+            resolve();
+          })
+          .on("error", err => {
+            reject("upload error", err);
+          })
+          .end(req.files[index].buffer);
       });
-
-      tempblob_stream.on("finish", () => {
-        // The public URL can be used to directly access the file via HTTP.
-        //const publicUrl = `https://storage.googleapis.com/${bucket.name}/${tempblob.name}`;
-        //res.status(200).send(publicUrl);
-        if (index + 1 === req.files.length) {
-          res.json({ msg: "Upload files success" });
-        }
-      });
-      tempblob_stream.end(req.files[index].buffer);
+      upload_queue.push(newPromise);
     });
+    try {
+      await Promise.all(upload_queue);
+    } catch (err) {
+      throw err;
+    }
+
+    res.json({ msg: "upload successful" });
   }
 };
