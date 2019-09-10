@@ -1,6 +1,7 @@
 import express from "express";
 import DataController from "../controllers/data";
 import Multer from "multer";
+import Middleware from "../middlewares/checkTokenAuth";
 const router = express.Router();
 const multer = Multer({
   storage: Multer.memoryStorage(),
@@ -9,6 +10,11 @@ const multer = Multer({
   }
 });
 
-router.post("/datastore", multer.array("files"), DataController.storeFiles);
+router.post(
+  "/datastore",
+  Middleware.checkAuth,
+  multer.array("files"),
+  DataController.storeFiles
+);
 
 export default router;
