@@ -1,5 +1,46 @@
 import uuid from "uuid/v4";
 export default {
+  getFiles: async (req, res, next) => {
+    //return an array of object
+    //each object represent a different data type
+    //each object has an inner array that contains the name of the files
+    const db = req.app.get("db");
+    const uploadedFiles_ref = db.collection("UploadedFiles");
+    const files = [];
+    let sorted_files = [];
+
+    let allFiles = await uploadedFiles_ref.get();
+
+    for (let doc of allFiles.docs) {
+      files.push(doc.data());
+    }
+
+    files.sort((a, b) => {
+      let nameA = a.fileType.toUpperCase(); // ignore upper and lowercase
+      let nameB = b.fileType.toUpperCase(); // ignore upper and lowercase
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+      return 0;
+    });
+
+    files.forEach(file => {
+      let same_files = [];
+      for (let fileItem of files) {
+        if (fileItem.fileType === file.fileType) {
+          same_files.push(fileItem.name);
+        }
+      }
+      if (!sorted_files.find(item => item.type === file.fileType)) {
+        sorted_files.push({ type: file.fileType, files: [...same_files] });
+      }
+    });
+    //console.log(sorted_files);
+    res.json({ msg: "fetch files route", files: sorted_files });
+  },
   storeFiles: async (req, res, next) => {
     const bucket = req.app.get("bucket");
     const db = req.app.get("db");

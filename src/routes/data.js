@@ -10,11 +10,13 @@ const multer = Multer({
   }
 });
 
-router.post(
-  "/datastore",
-  Middleware.checkAuth,
-  multer.array("files"),
-  DataController.storeFiles
-);
+router
+  .post(
+    "/datastore",
+    Middleware.checkAuth,
+    multer.array("files"),
+    DataController.storeFiles
+  )
+  .get("/datastore", Middleware.checkAuth, DataController.getFiles);
 
 export default router;

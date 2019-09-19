@@ -4,6 +4,7 @@ export default {
     const auth = req.app.get("auth");
     if (!req.headers.authorization) {
       const error = new Error("No auth in header");
+      console.log("no token in header");
       error.statusCode = 401;
       return next(error);
     }
@@ -12,6 +13,7 @@ export default {
       await auth.verifyIdToken(token);
     } catch (err) {
       const error = new Error("Unable to verify token");
+      console.log("unable to verify token");
       error.statusCode = 500;
       return next(error);
     }
