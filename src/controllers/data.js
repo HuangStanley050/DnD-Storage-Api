@@ -15,18 +15,6 @@ export default {
       files.push(doc.data());
     }
 
-    files.sort((a, b) => {
-      let nameA = a.fileType.toUpperCase(); // ignore upper and lowercase
-      let nameB = b.fileType.toUpperCase(); // ignore upper and lowercase
-      if (nameA < nameB) {
-        return -1;
-      }
-      if (nameA > nameB) {
-        return 1;
-      }
-      return 0;
-    });
-
     files.forEach(file => {
       let same_files = [];
       for (let fileItem of files) {
