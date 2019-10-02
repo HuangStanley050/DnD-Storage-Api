@@ -1,5 +1,42 @@
 import uuid from "uuid/v4";
 export default {
+  downloadFile: async (req, res, next) => {
+    const bucket = req.app.get("bucket");
+    const db = req.app.get("db");
+    let file;
+    let query;
+    let fileName;
+    let downloadLink;
+    const options = {
+      version: "v2", // defaults to 'v2' if missing.
+      action: "read",
+      expires: Date.now() + 1000 * 60 * 60 // one hour
+    };
+
+    try {
+      file = await db
+        .collection("UploadedFiles")
+        .doc(req.params.id)
+        .get();
+
+      fileName = file.data().name;
+
+      const [files] = await bucket.getFiles();
+
+      files.forEach(file => {
+        if (file.name.includes(fileName)) {
+          query = file.name;
+        }
+      });
+      downloadLink = await bucket.file(query).getSignedUrl(options);
+    } catch (err) {
+      const error = new Error("Unable to fetch download link");
+      error.statusCode = 500;
+      return next(error);
+    }
+    //console.log(downloadLink);
+    res.json({ msg: "download successful", link: downloadLink });
+  },
   getFiles: async (req, res, next) => {
     //return an array of object
     //each object represent a different data type

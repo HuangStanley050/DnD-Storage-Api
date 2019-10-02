@@ -17,6 +17,11 @@ router
     multer.array("files"),
     DataController.storeFiles
   )
-  .get("/datastore", Middleware.checkAuth, DataController.getFiles);
+  .get("/datastore", Middleware.checkAuth, DataController.getFiles)
+  .get(
+    "/datastore/download/:id",
+    Middleware.checkAuth,
+    DataController.downloadFile
+  );
 
 export default router;
