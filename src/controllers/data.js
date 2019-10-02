@@ -12,21 +12,21 @@ export default {
     let allFiles = await uploadedFiles_ref.get();
 
     for (let doc of allFiles.docs) {
-      files.push(doc.data());
+      files.push({ id: doc.id, ...doc.data() });
     }
 
     files.forEach(file => {
       let same_files = [];
       for (let fileItem of files) {
         if (fileItem.fileType === file.fileType) {
-          same_files.push(fileItem.name);
+          same_files.push({ id: fileItem.id, name: fileItem.name });
         }
       }
       if (!sorted_files.find(item => item.type === file.fileType)) {
         sorted_files.push({ type: file.fileType, files: [...same_files] });
       }
     });
-    //console.log(sorted_files);
+    console.log(sorted_files);
     res.json({ msg: "fetch files route", files: sorted_files });
   },
   storeFiles: async (req, res, next) => {
