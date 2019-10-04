@@ -78,22 +78,6 @@ export default {
     let fileInfo;
     let storageName;
 
-    // req.files.forEach((file, index) => {
-    //   let tempblob = bucket.file(`DnD-${uuid()}-${file.originalname}`);
-    //   const newPromise = new Promise((resolve, reject) => {
-    //     tempblob
-    //       .createWriteStream()
-    //       .on("finish", () => {
-    //         resolve();
-    //       })
-    //       .on("error", err => {
-    //         reject("upload error", err);
-    //       })
-    //       .end(req.files[index].buffer);
-    //   });
-    //   upload_queue.push(newPromise);
-    // });
-
     req.files.map(async file => {
       fileSize = file.size;
       fileType = file.mimetype;
@@ -114,34 +98,13 @@ export default {
         let blob = bucket.file(storageName);
         let blobStream = blob.createWriteStream();
 
-        // blobStream.on("error", () => {
-        //   console.log(err.response);
-        //   next(err);
-        // });
-        //blobStream.on("finish", () => res.json({ msg: "upload successful" }));
+        blobStream.on("error", () => new Error());
         blobStream.end(file.buffer);
-        //database_queue.push(database_result);
-        //console.log(database_result.id);
       } catch (err) {
         const error = new Error("Unable to upload Files");
         return next(error);
       }
     });
     res.json({ msg: "Upload successful" });
-    // try {
-    //   await Promise.all(upload_queue);
-    //
-    // } catch (err) {
-    //   throw err;
-    // }
-    //console.log(name_files);
-
-    //
-    // try {
-    //   let result = await Promise.all(database_queue);
-    // } catch (err) {
-    //   console.log(err);
-    //   throw err;
-    // }
   }
 };
