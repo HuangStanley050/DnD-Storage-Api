@@ -76,24 +76,25 @@ export default {
     let creationTime;
     let creator = "Goblin Slayer";
     let fileInfo;
+    let storageName;
 
-    req.files.forEach((file, index) => {
-      let tempblob = bucket.file(`DnD-${uuid()}-${file.originalname}`);
-      const newPromise = new Promise((resolve, reject) => {
-        tempblob
-          .createWriteStream()
-          .on("finish", () => {
-            resolve();
-          })
-          .on("error", err => {
-            reject("upload error", err);
-          })
-          .end(req.files[index].buffer);
-      });
-      upload_queue.push(newPromise);
-    });
+    // req.files.forEach((file, index) => {
+    //   let tempblob = bucket.file(`DnD-${uuid()}-${file.originalname}`);
+    //   const newPromise = new Promise((resolve, reject) => {
+    //     tempblob
+    //       .createWriteStream()
+    //       .on("finish", () => {
+    //         resolve();
+    //       })
+    //       .on("error", err => {
+    //         reject("upload error", err);
+    //       })
+    //       .end(req.files[index].buffer);
+    //   });
+    //   upload_queue.push(newPromise);
+    // });
 
-    req.files.forEach(file => {
+    req.files.map(async file => {
       fileSize = file.size;
       fileType = file.mimetype;
       creationTime = Date.now();
@@ -104,23 +105,43 @@ export default {
         creator,
         name: file.originalname
       };
-      let database_result = db.collection("UploadedFiles").add(fileInfo);
-      database_queue.push(database_result);
+      try {
+        let database_result = await db
+          .collection("UploadedFiles")
+          .add(fileInfo);
+        storageName = `${database_result.id}-${file.originalname}`;
+        //console.log(storageName);
+        let blob = bucket.file(storageName);
+        let blobStream = blob.createWriteStream();
+
+        // blobStream.on("error", () => {
+        //   console.log(err.response);
+        //   next(err);
+        // });
+        //blobStream.on("finish", () => res.json({ msg: "upload successful" }));
+        blobStream.end(file.buffer);
+        //database_queue.push(database_result);
+        //console.log(database_result.id);
+      } catch (err) {
+        const error = new Error("Unable to upload Files");
+        return next(error);
+      }
     });
+    res.json({ msg: "Upload successful" });
+    // try {
+    //   await Promise.all(upload_queue);
+    //
+    // } catch (err) {
+    //   throw err;
+    // }
+    //console.log(name_files);
 
-    try {
-      await Promise.all(upload_queue);
-    } catch (err) {
-      throw err;
-    }
-
-    res.json({ msg: "upload successful" });
-
-    try {
-      let result = await Promise.all(database_queue);
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
+    //
+    // try {
+    //   let result = await Promise.all(database_queue);
+    // } catch (err) {
+    //   console.log(err);
+    //   throw err;
+    // }
   }
 };
