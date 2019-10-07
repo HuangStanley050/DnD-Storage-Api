@@ -1,12 +1,7 @@
-import uuid from "uuid/v4";
 export default {
   downloadFile: async (req, res, next) => {
     const bucket = req.app.get("bucket");
-    const db = req.app.get("db");
-    let file;
-    let query;
-    let fileName;
-    let downloadLink;
+    const fileId = req.params.id;
     const options = {
       version: "v2", // defaults to 'v2' if missing.
       action: "read",
@@ -14,28 +9,13 @@ export default {
     };
 
     try {
-      file = await db
-        .collection("UploadedFiles")
-        .doc(req.params.id)
-        .get();
-
-      fileName = file.data().name;
-
-      const [files] = await bucket.getFiles();
-
-      files.forEach(file => {
-        if (file.name.includes(fileName)) {
-          query = file.name;
-        }
-      });
-      downloadLink = await bucket.file(query).getSignedUrl(options);
+      const [url] = await bucket.file(fileId).getSignedUrl(options);
+      res.json({ msg: "download link successfully generated", link: url });
     } catch (err) {
-      const error = new Error("Unable to fetch download link");
-      error.statusCode = 500;
+      console.log(err);
+      const error = new Error("unable to download file");
       return next(error);
     }
-    //console.log(downloadLink);
-    res.json({ msg: "download successful", link: downloadLink });
   },
   getFiles: async (req, res, next) => {
     //return an array of object
@@ -63,7 +43,7 @@ export default {
         sorted_files.push({ type: file.fileType, files: [...same_files] });
       }
     });
-    console.log(sorted_files);
+    //console.log(sorted_files);
     res.json({ msg: "fetch files route", files: sorted_files });
   },
   storeFiles: async (req, res, next) => {
@@ -93,7 +73,7 @@ export default {
         let database_result = await db
           .collection("UploadedFiles")
           .add(fileInfo);
-        storageName = `${database_result.id}-${file.originalname}`;
+        storageName = `${database_result.id}`;
         //console.log(storageName);
         let blob = bucket.file(storageName);
         let blobStream = blob.createWriteStream();
