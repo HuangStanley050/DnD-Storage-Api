@@ -11,6 +11,7 @@ const multer = Multer({
 });
 
 router
+  .delete("/datastore", Middleware.checkAuth, DataController.deleteFile)
   .post(
     "/datastore",
     Middleware.checkAuth,

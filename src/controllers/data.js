@@ -1,4 +1,22 @@
 export default {
+  deleteFile: async (req, res, next) => {
+    const bucket = req.app.get("bucket");
+    const db = req.app.get("db");
+    const fileID = req.body.fileID;
+
+    try {
+      await bucket.file(fileID).delete();
+      await db
+        .collection("UploadedFiles")
+        .doc(fileID)
+        .delete();
+      res.json({ msg: "File deleted" });
+    } catch (err) {
+      console.log(err);
+      const error = new Error("Unable to delete file");
+      return next(error);
+    }
+  },
   downloadFile: async (req, res, next) => {
     const bucket = req.app.get("bucket");
     const fileId = req.params.id;
