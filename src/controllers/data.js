@@ -67,7 +67,7 @@ export default {
   storeFiles: async (req, res, next) => {
     const bucket = req.app.get("bucket");
     const db = req.app.get("db");
-    let upload_queue = [];
+    let writeStreamQueue = [];
     let database_queue = [];
     let fileSize;
     let fileType;
@@ -94,15 +94,24 @@ export default {
         storageName = `${database_result.id}`;
         //console.log(storageName);
         let blob = bucket.file(storageName);
-        let blobStream = blob.createWriteStream();
-
-        blobStream.on("error", () => new Error());
-        blobStream.end(file.buffer);
+        const writeStreamPromise = new Promise((resolve, reject) => {
+          blob
+            .createWriteStream()
+            .on("finish", () => resolve())
+            .on("error", err => reject("Unable to upload", err))
+            .end(file.buffer);
+        });
+        writeStreamQueue.push(writeStreamPromise);
       } catch (err) {
         const error = new Error("Unable to upload Files");
         return next(error);
       }
     });
-    res.json({ msg: "Upload successful" });
+    try {
+      await Promise.all(writeStreamQueue);
+      return res.json({ msg: "Upload successful" });
+    } catch (err) {
+      return next(new Error("Unable to upload files"));
+    }
   }
 };
