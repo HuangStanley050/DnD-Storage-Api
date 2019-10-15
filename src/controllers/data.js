@@ -19,13 +19,29 @@ export default {
   },
   downloadFile: async (req, res, next) => {
     const bucket = req.app.get("bucket");
+    const db = req.app.get("db");
     const fileId = req.params.id;
-    const options = {
+    let fileName = "defaultName";
+    let options = {};
+
+    try {
+      let dataRef = await db
+        .collection("UploadedFiles")
+        .doc(fileId)
+        .get();
+      let { name } = dataRef.data();
+      fileName = name;
+    } catch (err) {
+      console.log(err);
+      return next(new Error("Unable to retrieve filename"));
+    }
+    options = {
+      ...options,
       version: "v2", // defaults to 'v2' if missing.
       action: "read",
-      expires: Date.now() + 1000 * 60 * 60 // one hour
+      expires: Date.now() + 1000 * 60 * 60, // one hour
+      promptSaveAs: fileName
     };
-
     try {
       const [url] = await bucket.file(fileId).getSignedUrl(options);
       res.json({ msg: "download link successfully generated", link: url });
