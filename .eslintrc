@@ -1,0 +1,12 @@
+{
+  "extends": ["prettier", "airbnb"],
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": ["error"],
+    "quotes": [1, "double", { "avoidEscape": false }],
+    "no-unused-vars": "off"
+  },
+  "env": {
+    "node": true
+  }
+}
