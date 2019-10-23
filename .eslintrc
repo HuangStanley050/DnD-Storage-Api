@@ -6,7 +6,8 @@
     "quotes": [1, "double", { "avoidEscape": false }],
     "no-unused-vars": "off",
     "comma-dangle": "off",
-    "arrow-parens": ["error", "as-needed"]
+    "arrow-parens": ["error", "as-needed"],
+    "no-console": ["warn"]
   },
   "env": {
     "node": true
