@@ -5,7 +5,8 @@
     "prettier/prettier": ["error"],
     "quotes": [1, "double", { "avoidEscape": false }],
     "no-unused-vars": "off",
-    "comma-dangle": "off"
+    "comma-dangle": "off",
+    "arrow-parens": ["error", "as-needed"]
   },
   "env": {
     "node": true
