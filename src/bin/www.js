@@ -25,6 +25,7 @@ function normalizePort(val) {
 
   return false;
 }
+const server = http.createServer(app);
 const port = normalizePort(process.env.PORT || "8000");
 /**
  * Event listener for HTTP server "error" event.
@@ -70,8 +71,6 @@ function onListening() {
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-const server = http.createServer(app);
 
 app.set("port", port);
 server.listen(port);
