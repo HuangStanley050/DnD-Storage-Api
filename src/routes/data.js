@@ -1,7 +1,8 @@
 import express from "express";
-import DataController from "../controllers/data";
 import Multer from "multer";
+import DataController from "../controllers/data";
 import Middleware from "../middlewares/checkTokenAuth";
+
 const router = express.Router();
 const multer = Multer({
   storage: Multer.memoryStorage(),
