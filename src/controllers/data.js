@@ -3,7 +3,7 @@ export default {
     const bucket = req.app.get("bucket");
     const db = req.app.get("db");
     const { fileID } = req.body;
-    console.log(fileID);
+
     try {
       await bucket.file(fileID).delete();
       await db
@@ -12,7 +12,6 @@ export default {
         .delete();
       return res.json({ msg: "File deleted" });
     } catch (err) {
-      console.log(err);
       const error = new Error("Unable to delete file");
       return next(error);
     }
